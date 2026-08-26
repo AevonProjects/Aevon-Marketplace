@@ -1,0 +1,16 @@
+AEVON MARKETPLACE v0.2 UPDATE
+
+This project keeps the existing database schema, so you do NOT need to run prisma db push again for this update.
+
+What changed:
+- Admin > Products is now functional.
+- Add new plugin products.
+- Edit plugin name, URL slug, descriptions, price, currency, version, supported versions, and status.
+- Publish / Unpublish products.
+- Archive products.
+- Public homepage and /plugins pages now read PUBLISHED products directly from Neon.
+
+GitHub update:
+Replace the repository files with the contents of this folder, preserving your Vercel environment variables. Do NOT upload a local .env file if you have one.
+
+After GitHub receives the changes, Vercel should automatically create a new deployment.

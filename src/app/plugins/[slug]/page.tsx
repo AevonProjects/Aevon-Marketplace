@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { starterProducts } from "@/lib/products";
+import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/product-utils";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = starterProducts.find((p) => p.slug === slug);
+  const product = await db.product.findFirst({ where: { slug, status: "PUBLISHED" } });
   if (!product) notFound();
 
   return (
@@ -14,16 +17,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <section className="card p-8">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-500/15 text-xl font-black text-violet-300">A</div>
           <h1 className="mt-6 text-4xl font-black">{product.name}</h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-zinc-400">{product.description}</p>
+          <p className="mt-5 max-w-3xl whitespace-pre-line text-lg leading-8 text-zinc-400">{product.description}</p>
 
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             <div className="rounded-xl border border-white/10 p-4">
               <p className="text-xs uppercase text-zinc-500">Current version</p>
-              <p className="mt-1 font-bold">{product.version}</p>
+              <p className="mt-1 font-bold">{product.currentVersion || "TBA"}</p>
             </div>
             <div className="rounded-xl border border-white/10 p-4">
-              <p className="text-xs uppercase text-zinc-500">Platforms</p>
-              <p className="mt-1 font-bold">Paper / Purpur</p>
+              <p className="text-xs uppercase text-zinc-500">Supported</p>
+              <p className="mt-1 font-bold">{product.supportedVersions || "See documentation"}</p>
             </div>
             <div className="rounded-xl border border-white/10 p-4">
               <p className="text-xs uppercase text-zinc-500">License</p>
@@ -34,10 +37,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
         <aside className="card h-fit p-7">
           <p className="text-sm text-zinc-500">License price</p>
-          <p className="mt-2 text-4xl font-black">{product.price}</p>
-          <p className="mt-5 text-sm leading-6 text-zinc-400">
-            Purchasing will be enabled in v0.2. Registration and ownership infrastructure are already being prepared.
-          </p>
+          <p className="mt-2 text-4xl font-black">{formatPrice(product.priceCents, product.currency)}</p>
+          <p className="mt-5 text-sm leading-6 text-zinc-400">Purchasing will be connected in the next marketplace milestone. Your account and product ownership system are already prepared.</p>
           <Link href="/register" className="btn btn-primary mt-7 w-full">Create account to purchase</Link>
         </aside>
       </div>

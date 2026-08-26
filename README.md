@@ -59,3 +59,7 @@ v0.3: private JAR storage + protected downloads
 v0.4: license generation + activation API  
 v0.5: ACore license integration  
 v1.0: production hardening and deployment
+
+## v0.2 Product Management
+
+The Admin → Products module is now functional. Admins can create products, edit product information, publish/unpublish listings, and archive listings. The homepage and public plugin store now load published products directly from PostgreSQL/Neon.
