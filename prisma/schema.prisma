@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+  CANCELED
+}
+
+enum LicenseStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum ActivationStatus {
+  ACTIVE
+  REVOKED
+}
+
+model User {
+  id             String         @id @default(cuid())
+  username       String         @unique
+  email          String         @unique
+  passwordHash   String
+  emailVerified  Boolean        @default(false)
+  role           UserRole       @default(CUSTOMER)
+  status         AccountStatus  @default(ACTIVE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  lastLoginAt    DateTime?
+
+  purchases      Purchase[]
+  licenses       License[]
+  downloadLogs   DownloadLog[]
+}
+
+model Product {
+  id                   String         @id @default(cuid())
+  name                 String
+  slug                 String         @unique
+  shortDescription     String
+  description          String
+  priceCents           Int
+  currency             String         @default("PHP")
+  currentVersion       String?
+  supportedVersions    String?
+  status               ProductStatus  @default(DRAFT)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  purchases            Purchase[]
+  licenses             License[]
+  releases             Release[]
+  downloadLogs         DownloadLog[]
+}
+
+model Purchase {
+  id               String          @id @default(cuid())
+  userId           String
+  productId        String
+  amountPaidCents  Int
+  currency         String          @default("PHP")
+  paymentProvider  String?
+  paymentReference String?         @unique
+  status           PurchaseStatus  @default(PENDING)
+  purchasedAt      DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  license          License?
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model License {
+  id          String        @id @default(cuid())
+  licenseKey  String        @unique
+  userId      String
+  productId   String
+  purchaseId  String?       @unique
+  serverSlots Int           @default(1)
+  status      LicenseStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  expiresAt   DateTime?
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  purchase    Purchase?     @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+  activations Activation[]
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model Activation {
+  id               String           @id @default(cuid())
+  licenseId        String
+  serverIdentifier String
+  serverIp         String?
+  firstActivatedAt DateTime         @default(now())
+  lastCheckedAt    DateTime         @default(now())
+  status           ActivationStatus @default(ACTIVE)
+
+  license          License          @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  @@unique([licenseId, serverIdentifier])
+  @@index([licenseId])
+}
+
+model Release {
+  id          String   @id @default(cuid())
+  productId   String
+  version     String
+  storageKey  String?
+  changelog   String?
+  isPublished Boolean  @default(false)
+  releasedAt  DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  downloadLogs DownloadLog[]
+
+  @@unique([productId, version])
+  @@index([productId])
+}
+
+model DownloadLog {
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  releaseId  String?
+  ipAddress  String?
+  downloadedAt DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  release    Release? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([productId])
+}
