@@ -63,3 +63,12 @@ v1.0: production hardening and deployment
 ## v0.2 Product Management
 
 The Admin → Products module is now functional. Admins can create products, edit product information, publish/unpublish listings, and archive listings. The homepage and public plugin store now load published products directly from PostgreSQL/Neon.
+
+## v0.3
+
+- Functional Admin → Customers list
+- Customer detail page
+- Suspend/reactivate customer accounts
+- Promote/demote other accounts
+- Purchase/license summaries per customer
+- Self-lockout protection for the active administrator
