@@ -72,3 +72,28 @@ The Admin → Products module is now functional. Admins can create products, edi
 - Promote/demote other accounts
 - Purchase/license summaries per customer
 - Self-lockout protection for the active administrator
+
+
+## v0.4 — PayMongo Test Checkout
+
+- Logged-in customers can start PayMongo checkout from a plugin page
+- Purchase records begin as PENDING
+- PayMongo `payment.paid` webhook is re-verified against PayMongo's API
+- Only verified paid transactions become PAID
+- Paid transactions automatically create an AEVN license key
+- Purchased plugins appear in Customer Dashboard → My Plugins
+- Admin → Orders is functional
+
+### Required Vercel environment variable
+
+`PAYMONGO_SECRET_KEY`
+
+### Webhook endpoint
+
+After deploying v0.4, create one PayMongo test webhook for:
+
+`https://YOUR-VERCEL-DOMAIN/api/paymongo/webhook`
+
+Subscribe it to `payment.paid`.
+
+Do not create a webhook per purchase. One endpoint is enough.

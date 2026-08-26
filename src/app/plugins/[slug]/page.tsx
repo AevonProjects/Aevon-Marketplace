@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/product-utils";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const product = await db.product.findFirst({ where: { slug, status: "PUBLISHED" } });
   if (!product) notFound();
+
+  const user = await getCurrentUser();
+  const owned = user
+    ? await db.purchase.findFirst({
+        where: { userId: user.id, productId: product.id, status: "PAID" }
+      })
+    : null;
 
   return (
     <main className="container py-14">
@@ -38,8 +46,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <aside className="card h-fit p-7">
           <p className="text-sm text-zinc-500">License price</p>
           <p className="mt-2 text-4xl font-black">{formatPrice(product.priceCents, product.currency)}</p>
-          <p className="mt-5 text-sm leading-6 text-zinc-400">Purchasing will be connected in the next marketplace milestone. Your account and product ownership system are already prepared.</p>
-          <Link href="/register" className="btn btn-primary mt-7 w-full">Create account to purchase</Link>
+          <p className="mt-5 text-sm leading-6 text-zinc-400">
+            {owned
+              ? "This plugin is already owned by your account."
+              : "Checkout is handled securely by PayMongo. Test mode is currently being used while we verify the store flow."}
+          </p>
+
+          {owned ? (
+            <Link href="/dashboard/plugins" className="btn btn-secondary mt-7 w-full">Open My Plugins</Link>
+          ) : user ? (
+            <form action={`/api/checkout/${product.id}`} method="post">
+              <button type="submit" className="btn btn-primary mt-7 w-full">Buy with PayMongo</button>
+            </form>
+          ) : (
+            <Link href="/login" className="btn btn-primary mt-7 w-full">Login to purchase</Link>
+          )}
         </aside>
       </div>
     </main>

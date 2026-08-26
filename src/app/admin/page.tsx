@@ -7,7 +7,7 @@ export default async function AdminPage() {
   const sections = [
     ["Products", "Create, edit, publish, unpublish, and archive plugins.", "/admin/products", true],
     ["Customers", "Review customer accounts and account status.", "/admin/customers", true],
-    ["Orders", "Inspect purchases and payment records.", "#", false],
+    ["Orders", "Inspect purchases and payment records.", "/admin/orders", true],
     ["Licenses", "Issue, suspend, revoke, and inspect licenses.", "#", false],
     ["Releases", "Publish versions and manage private JAR files.", "#", false],
     ["Logs", "Audit downloads, activations, and important security events.", "#", false]
