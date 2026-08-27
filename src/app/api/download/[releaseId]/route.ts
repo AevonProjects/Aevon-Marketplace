@@ -48,6 +48,7 @@ export async function GET(
     pathname: release.storageKey,
     operation: "get",
     validUntil,
+    access: "private",
   });
 
   const forwarded = request.headers.get("x-forwarded-for");

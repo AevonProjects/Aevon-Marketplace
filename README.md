@@ -108,3 +108,6 @@ Do not create a webhook per purchase. One endpoint is enough.
 
 ## v0.5.1
 Corrected private Vercel Blob release upload/download implementation.
+
+## v0.5.2
+- Added required `access: "private"` to Vercel Blob signed upload/download URLs.

@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     pathname,
     operation: "put",
     validUntil,
+    access: "private",
   });
 
   return NextResponse.json({ pathname, presignedUrl });
