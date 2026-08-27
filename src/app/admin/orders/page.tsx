@@ -33,7 +33,7 @@ export default async function OrdersPage() {
               <th className="p-4">Status</th>
               <th className="p-4">Provider</th>
               <th className="p-4">Date</th>
-              <th className="p-4">License</th>
+              <th className="p-4">License</th><th className="p-4"></th>
             </tr>
           </thead>
           <tbody>
@@ -54,6 +54,13 @@ export default async function OrdersPage() {
                 <td className="p-4">{order.paymentProvider || "—"}</td>
                 <td className="p-4 text-zinc-400">{order.purchasedAt.toLocaleString()}</td>
                 <td className="p-4">{order.license ? "Issued" : "—"}</td>
+                <td className="p-4">
+                  {order.status === "PENDING" && order.paymentProvider === "PAYMONGO" ? (
+                    <form action={`/api/admin/orders/${order.id}/reconcile`} method="post">
+                      <button className="btn btn-secondary" type="submit">Verify payment</button>
+                    </form>
+                  ) : null}
+                </td>
               </tr>
             ))}
           </tbody>

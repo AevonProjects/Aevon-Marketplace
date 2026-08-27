@@ -79,3 +79,10 @@ export async function retrievePayment(paymentId: string) {
     method: "GET"
   });
 }
+
+
+export async function retrieveCheckoutSession(checkoutSessionId: string) {
+  return paymongoRequest(`/checkout_sessions/${encodeURIComponent(checkoutSessionId)}`, {
+    method: "GET"
+  });
+}

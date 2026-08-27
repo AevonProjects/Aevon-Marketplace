@@ -97,3 +97,10 @@ After deploying v0.4, create one PayMongo test webhook for:
 Subscribe it to `payment.paid`.
 
 Do not create a webhook per purchase. One endpoint is enough.
+
+## v0.4.1
+
+- Fix PayMongo paid-order reconciliation when payment webhook external reference is missing
+- Success page verifies the stored Checkout Session directly with PayMongo
+- Admin Orders can manually run secure PayMongo verification for a pending order
+- Ownership/license is still granted only after a server-to-server paid verification
