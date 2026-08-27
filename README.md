@@ -111,3 +111,8 @@ Corrected private Vercel Blob release upload/download implementation.
 
 ## v0.5.2
 - Added required `access: "private"` to Vercel Blob signed upload/download URLs.
+
+## v0.5.3
+- Replaced custom signed-PUT upload with official @vercel/blob/client upload + handleUpload flow.
+- Upload access is explicitly private to match the private Blob store.
+- Better upload error messages are shown directly in Admin → Releases.

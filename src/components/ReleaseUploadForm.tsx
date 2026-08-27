@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { upload } from "@vercel/blob/client";
 
 export function ReleaseUploadForm({
   products,
@@ -18,56 +19,59 @@ export function ReleaseUploadForm({
     try {
       const form = new FormData(event.currentTarget);
       const file = form.get("file");
+      const productId = String(form.get("productId") || "");
+      const version = String(form.get("version") || "").trim();
+      const changelog = String(form.get("changelog") || "").trim();
+      const publish = form.get("publish") === "on";
 
-      if (!(file instanceof File) || !file.name.toLowerCase().endsWith(".jar")) {
-        throw new Error("Please choose a .jar file.");
+      if (!(file instanceof File) || file.size === 0) {
+        throw new Error("Please choose a JAR file.");
       }
 
-      const prepRes = await fetch("/api/admin/releases/presign", {
+      if (!file.name.toLowerCase().endsWith(".jar")) {
+        throw new Error("Only .jar files are allowed.");
+      }
+
+      if (!productId || !version) {
+        throw new Error("Choose a plugin and enter a version.");
+      }
+
+      const payload = JSON.stringify({
+        productId,
+        version,
+        originalFileName: file.name,
+      });
+
+      const blob = await upload(file.name, file, {
+        access: "private",
+        handleUploadUrl: "/api/admin/releases/upload",
+        clientPayload: payload,
+        multipart: file.size > 5 * 1024 * 1024,
+      });
+
+      const finishResponse = await fetch("/api/admin/releases/finalize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId: form.get("productId"),
-          version: form.get("version"),
-          fileName: file.name,
-          fileSize: file.size,
+          productId,
+          version,
+          changelog,
+          storageKey: blob.pathname,
+          publish,
         }),
       });
 
-      const prep = await prepRes.json();
-      if (!prepRes.ok) throw new Error(prep.error || "Could not prepare upload.");
+      const finish = await finishResponse.json().catch(() => null);
 
-      const uploadRes = await fetch(prep.presignedUrl, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/java-archive",
-          "x-vercel-blob-access": "private",
-        },
-        body: file,
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error("The JAR could not be uploaded to private storage.");
+      if (!finishResponse.ok) {
+        throw new Error(finish?.error || "The JAR uploaded, but the release could not be saved.");
       }
-
-      const finishRes = await fetch("/api/admin/releases/finalize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: form.get("productId"),
-          version: form.get("version"),
-          changelog: form.get("changelog"),
-          storageKey: prep.pathname,
-          publish: form.get("publish") === "on",
-        }),
-      });
-
-      const finish = await finishRes.json();
-      if (!finishRes.ok) throw new Error(finish.error || "Could not save release.");
 
       window.location.href = "/admin/releases";
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Upload failed.");
+      const message =
+        error instanceof Error ? error.message : "Release upload failed.";
+      setMessage(message);
       setBusy(false);
     }
   }
@@ -87,7 +91,13 @@ export function ReleaseUploadForm({
 
         <label>
           <span className="mb-2 block text-sm font-bold">Version</span>
-          <input className="input" name="version" placeholder="1.0.0" required maxLength={40} />
+          <input
+            className="input"
+            name="version"
+            placeholder="e.g. 1.1.1"
+            required
+            maxLength={40}
+          />
         </label>
       </div>
 
@@ -100,6 +110,9 @@ export function ReleaseUploadForm({
           required
           className="block w-full rounded-xl border border-white/10 bg-black/20 p-4 text-sm"
         />
+        <span className="mt-2 block text-xs text-zinc-500">
+          Uploaded directly from your browser into your private Vercel Blob store.
+        </span>
       </label>
 
       <label className="mt-5 block">

@@ -12,21 +12,30 @@ export async function POST(request: Request) {
   const storageKey = String(body?.storageKey || "");
   const publish = Boolean(body?.publish);
 
-  if (!productId || !version || !storageKey.startsWith("plugin-releases/")) {
+  if (!productId || !version || !storageKey) {
     return NextResponse.json({ error: "Invalid release information." }, { status: 400 });
   }
 
-  const product = await db.product.findUnique({ where: { id: productId } });
+  const product = await db.product.findUnique({
+    where: { id: productId },
+    select: { id: true },
+  });
+
   if (!product) {
     return NextResponse.json({ error: "Plugin not found." }, { status: 404 });
   }
 
   const exists = await db.release.findUnique({
-    where: { productId_version: { productId, version } },
+    where: {
+      productId_version: {
+        productId,
+        version,
+      },
+    },
   });
 
   if (exists) {
-    return NextResponse.json({ error: "That version already exists." }, { status: 409 });
+    return NextResponse.json({ error: "That release already exists." }, { status: 409 });
   }
 
   await db.$transaction(async (tx) => {
