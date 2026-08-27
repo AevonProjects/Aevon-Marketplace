@@ -12,18 +12,22 @@ export default async function Page() {
     where: { userId: user.id },
     include: { product: true, release: true },
     orderBy: { downloadedAt: "desc" },
-    take: 100
+    take: 100,
   });
 
   return (
     <main className="container py-14">
       <h1 className="text-4xl font-black">Downloads</h1>
-      <p className="mt-3 text-zinc-400">Your recent authorized plugin downloads.</p>
+      <p className="mt-3 text-zinc-400">Your authorized download history.</p>
 
       <div className="card mt-8 overflow-x-auto">
-        <table className="w-full min-w-[700px] text-left text-sm">
+        <table className="w-full min-w-[650px] text-left text-sm">
           <thead className="border-b border-white/10 text-zinc-500">
-            <tr><th className="p-4">Plugin</th><th className="p-4">Version</th><th className="p-4">Downloaded</th></tr>
+            <tr>
+              <th className="p-4">Plugin</th>
+              <th className="p-4">Version</th>
+              <th className="p-4">Downloaded</th>
+            </tr>
           </thead>
           <tbody>
             {logs.map((log) => (
@@ -35,6 +39,7 @@ export default async function Page() {
             ))}
           </tbody>
         </table>
+
         {logs.length === 0 && <p className="p-8 text-zinc-400">No downloads yet.</p>}
       </div>
     </main>

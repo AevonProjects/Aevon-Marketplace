@@ -16,23 +16,23 @@ export default async function Page() {
         include: {
           releases: {
             where: { isPublished: true },
-            orderBy: { releasedAt: "desc" }
-          }
-        }
+            orderBy: { releasedAt: "desc" },
+          },
+        },
       },
-      license: true
+      license: true,
     },
-    orderBy: { purchasedAt: "desc" }
+    orderBy: { purchasedAt: "desc" },
   });
 
   return (
     <main className="container py-14">
       <h1 className="text-4xl font-black">My Plugins</h1>
-      <p className="mt-3 text-zinc-400">Your purchased plugins, licenses, and secure releases.</p>
+      <p className="mt-3 text-zinc-400">Your purchased plugins and secure downloads.</p>
 
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         {purchases.map((purchase) => {
-          const latest = purchase.product.releases[0];
+          const release = purchase.product.releases[0];
 
           return (
             <div key={purchase.id} className="card p-6">
@@ -55,26 +55,27 @@ export default async function Page() {
                 </p>
               </div>
 
-              {latest ? (
+              {release ? (
                 <div className="mt-5 rounded-xl border border-white/10 p-4">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center justify-between gap-4">
                     <div>
                       <p className="text-xs uppercase tracking-wider text-zinc-500">Latest Release</p>
-                      <p className="mt-1 font-bold">v{latest.version}</p>
+                      <p className="mt-1 font-bold">v{release.version}</p>
                     </div>
-                    <a href={`/api/download/${latest.id}`} className="btn btn-primary">
+                    <a href={`/api/download/${release.id}`} className="btn btn-primary">
                       Download JAR
                     </a>
                   </div>
-                  {latest.changelog && (
+
+                  {release.changelog && (
                     <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-zinc-400">
-                      {latest.changelog}
+                      {release.changelog}
                     </p>
                   )}
                 </div>
               ) : (
                 <div className="mt-5 rounded-xl border border-white/10 p-4 text-sm text-zinc-500">
-                  No downloadable release has been published yet.
+                  No published download is available yet.
                 </div>
               )}
 
@@ -85,13 +86,6 @@ export default async function Page() {
           );
         })}
       </div>
-
-      {purchases.length === 0 && (
-        <div className="card mt-8 p-7">
-          <p className="text-zinc-400">You do not own any plugins yet.</p>
-          <Link href="/plugins" className="btn btn-primary mt-5">Browse Plugins</Link>
-        </div>
-      )}
     </main>
   );
 }

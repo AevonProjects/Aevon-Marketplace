@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { head } from "@vercel/blob";
 import { requireAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 
@@ -14,25 +13,20 @@ export async function POST(request: Request) {
   const publish = Boolean(body?.publish);
 
   if (!productId || !version || !storageKey.startsWith("plugin-releases/")) {
-    return NextResponse.json({ error: "Invalid release data." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid release information." }, { status: 400 });
   }
 
   const product = await db.product.findUnique({ where: { id: productId } });
   if (!product) {
-    return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    return NextResponse.json({ error: "Plugin not found." }, { status: 404 });
   }
 
-  const existing = await db.release.findUnique({
-    where: { productId_version: { productId, version } }
+  const exists = await db.release.findUnique({
+    where: { productId_version: { productId, version } },
   });
-  if (existing) {
-    return NextResponse.json({ error: "That release already exists." }, { status: 409 });
-  }
 
-  try {
-    await head(storageKey, { access: "private" });
-  } catch {
-    return NextResponse.json({ error: "Uploaded JAR could not be verified in private storage." }, { status: 400 });
+  if (exists) {
+    return NextResponse.json({ error: "That version already exists." }, { status: 409 });
   }
 
   await db.$transaction(async (tx) => {
@@ -42,14 +36,14 @@ export async function POST(request: Request) {
         version,
         storageKey,
         changelog: changelog || null,
-        isPublished: publish
-      }
+        isPublished: publish,
+      },
     });
 
     if (publish) {
       await tx.product.update({
         where: { id: productId },
-        data: { currentVersion: version }
+        data: { currentVersion: version },
       });
     }
   });

@@ -106,16 +106,5 @@ Do not create a webhook per purchase. One endpoint is enough.
 - Ownership/license is still granted only after a server-to-server paid verification
 
 
-## v0.5 — Private Plugin Releases
-
-- Admin → Releases is functional
-- Admin can upload plugin JARs directly to the connected private Vercel Blob store
-- Uploads use short-lived signed PUT URLs
-- Published releases update the product's current version
-- Paid customers receive a secure Download JAR button
-- Download requests re-check account status and PAID ownership
-- Downloads use short-lived signed GET URLs rather than permanent public JAR URLs
-- Download history is logged in Neon
-- Dashboard → Downloads shows recent authorized downloads
-
-The connected private Blob store provides BLOB_STORE_ID/OIDC automatically on Vercel; no Blob credential should be pasted into chat.
+## v0.5.1
+Corrected private Vercel Blob release upload/download implementation.

@@ -8,8 +8,11 @@ export default async function ReleasesPage() {
   await requireAdmin();
 
   const releases = await db.release.findMany({
-    include: { product: true, _count: { select: { downloadLogs: true } } },
-    orderBy: { releasedAt: "desc" }
+    include: {
+      product: true,
+      _count: { select: { downloadLogs: true } },
+    },
+    orderBy: { releasedAt: "desc" },
   });
 
   return (
@@ -18,7 +21,7 @@ export default async function ReleasesPage() {
         <div>
           <p className="text-sm font-bold uppercase tracking-[.2em] text-violet-400">Administration</p>
           <h1 className="mt-2 text-4xl font-black">Plugin Releases</h1>
-          <p className="mt-3 text-zinc-400">Upload private JAR files and publish versions for paying customers.</p>
+          <p className="mt-3 text-zinc-400">Upload private JAR releases for customers who own the plugin.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/admin" className="btn btn-secondary">Back to Admin</Link>
@@ -27,15 +30,14 @@ export default async function ReleasesPage() {
       </div>
 
       <div className="card mt-9 overflow-x-auto">
-        <table className="w-full min-w-[900px] text-left text-sm">
+        <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="border-b border-white/10 text-zinc-500">
             <tr>
               <th className="p-4">Plugin</th>
               <th className="p-4">Version</th>
               <th className="p-4">Published</th>
               <th className="p-4">Downloads</th>
-              <th className="p-4">Release Date</th>
-              <th className="p-4">Storage</th>
+              <th className="p-4">Released</th>
             </tr>
           </thead>
           <tbody>
@@ -46,7 +48,6 @@ export default async function ReleasesPage() {
                 <td className="p-4">{release.isPublished ? "Yes" : "No"}</td>
                 <td className="p-4">{release._count.downloadLogs}</td>
                 <td className="p-4 text-zinc-400">{release.releasedAt.toLocaleString()}</td>
-                <td className="p-4 text-xs text-zinc-500">{release.storageKey ? "Private Blob" : "No file"}</td>
               </tr>
             ))}
           </tbody>
