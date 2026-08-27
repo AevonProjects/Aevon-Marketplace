@@ -123,3 +123,7 @@ Corrected private Vercel Blob release upload/download implementation.
 - Admin JAR uploads use short-lived signed PUT URLs.
 - Paid customer downloads use short-lived signed GET URLs.
 - Files remain private and download activity is logged.
+
+## v0.6.1
+- Replaced two stale Vercel Blob routes left behind in GitHub.
+- Active release storage code is Cloudflare R2 only.
