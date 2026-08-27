@@ -1,0 +1,66 @@
+import { NextResponse } from "next/server";
+import { issueSignedToken, presignUrl } from "@vercel/blob";
+import { getCurrentUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+
+function clientIp(request: Request) {
+  const forwarded = request.headers.get("x-forwarded-for");
+  return forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || null;
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ releaseId: string }> }
+) {
+  const user = await getCurrentUser();
+  if (!user || user.status !== "ACTIVE") {
+    return NextResponse.redirect(new URL("/login", request.url), 303);
+  }
+
+  const { releaseId } = await params;
+
+  const release = await db.release.findFirst({
+    where: { id: releaseId, isPublished: true },
+    include: { product: true }
+  });
+
+  if (!release || !release.storageKey) {
+    return NextResponse.json({ error: "Release not available." }, { status: 404 });
+  }
+
+  const ownership = await db.purchase.findFirst({
+    where: {
+      userId: user.id,
+      productId: release.productId,
+      status: "PAID"
+    }
+  });
+
+  if (!ownership && user.role !== "ADMIN") {
+    return NextResponse.json({ error: "You do not own this plugin." }, { status: 403 });
+  }
+
+  const validUntil = Date.now() + 2 * 60 * 1000;
+  const token = await issueSignedToken({
+    pathname: release.storageKey,
+    operations: ["get"],
+    validUntil
+  });
+
+  const { presignedUrl } = await presignUrl(token, {
+    pathname: release.storageKey,
+    operation: "get",
+    validUntil
+  });
+
+  await db.downloadLog.create({
+    data: {
+      userId: user.id,
+      productId: release.productId,
+      releaseId: release.id,
+      ipAddress: clientIp(request)
+    }
+  });
+
+  return NextResponse.redirect(presignedUrl, 302);
+}

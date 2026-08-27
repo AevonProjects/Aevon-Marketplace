@@ -9,7 +9,7 @@ export default async function AdminPage() {
     ["Customers", "Review customer accounts and account status.", "/admin/customers", true],
     ["Orders", "Inspect purchases and payment records.", "/admin/orders", true],
     ["Licenses", "Issue, suspend, revoke, and inspect licenses.", "#", false],
-    ["Releases", "Publish versions and manage private JAR files.", "#", false],
+    ["Releases", "Publish versions and manage private JAR files.", "/admin/releases", true],
     ["Logs", "Audit downloads, activations, and important security events.", "#", false]
   ] as const;
 
