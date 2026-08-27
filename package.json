@@ -1,6 +1,6 @@
 {
   "name": "aevon-marketplace",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -21,7 +21,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "zod": "^4.1.5",
-    "@vercel/blob": "^2.6.1"
+    "@aws-sdk/client-s3": "^3.883.0",
+    "@aws-sdk/s3-request-presigner": "^3.883.0"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

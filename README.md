@@ -116,3 +116,10 @@ Corrected private Vercel Blob release upload/download implementation.
 - Replaced custom signed-PUT upload with official @vercel/blob/client upload + handleUpload flow.
 - Upload access is explicitly private to match the private Blob store.
 - Better upload error messages are shown directly in Admin → Releases.
+
+
+## v0.6.0 — Cloudflare R2 Releases
+- Replaced Vercel Blob with private Cloudflare R2 storage.
+- Admin JAR uploads use short-lived signed PUT URLs.
+- Paid customer downloads use short-lived signed GET URLs.
+- Files remain private and download activity is logged.
